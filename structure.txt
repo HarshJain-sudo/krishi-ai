@@ -1,0 +1,19 @@
+   src/
+   ├── components/
+   │   ├── layout/
+   │   │   ├── Header.js
+   │   │   └── SectionHeader.js
+   │   ├── cards/
+   │   │   └── VoiceAssistantCard.js
+   │   ├── market/
+   │   │   ├── MarketPriceCard.js
+   │   │   └── MarketRateItem.js
+   │   └── weather/
+   │       └── WeatherSection.js
+   ├── constants/
+   │   └── theme.js
+   ├── screens/
+   │   └── HomeScreen.js
+   ├── styles/
+   ├── hooks/
+   └── utils/
