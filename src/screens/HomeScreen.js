@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { StyleSheet, ScrollView, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, ScrollView, View, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
@@ -12,26 +12,77 @@ import { MarketRateItem } from '../components/market/MarketRateItem';
 import { SectionHeader } from '../components/layout/SectionHeader';
 import { GovernmentSchemes } from '../components/schemes/GovernmentSchemes';
 import { FarmerTestimonials } from '../components/testimonials/FarmerTestimonials';
-import { COLORS } from '../constants/theme';
+import { COLORS, SPACING } from '../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
+import { api } from '../services/api';
 
-const marketPrices = [
-  { id: 1, name: 'बारानी मंडी', distance: '15 किमी दूर', price: '2,580' },
-  { id: 2, name: 'बारानी मंडी', distance: '15 किमी दूर', price: '2,580' },
-];
-
-const marketRates = [
-  { id: 1, cropName: 'गेहूं', priceRange: '₹2,580 - ₹2,750' },
-  { id: 2, cropName: 'गेहूं', priceRange: '₹2,580 - ₹2,750' },
-  { id: 3, cropName: 'गेहूं', priceRange: '₹2,580 - ₹2,750' },
-];
-
-export const HomeScreen = () => {
+export const HomeScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('home');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [homeData, setHomeData] = useState(null);
+
+  useEffect(() => {
+    loadHomeData();
+  }, []);
+
+  const loadHomeData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await api.getHomeScreenData();
+      setHomeData(data);
+    } catch (err) {
+      setError('डेटा लोड करने में समस्या हुई। कृपया पुनः प्रयास करें।');
+      console.error('Error loading home data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleTabPress = (tabId) => {
     setActiveTab(tabId);
   };
+
+  const handleSeeAll = (screenName) => {
+    if (screenName) {
+      navigation.navigate(screenName);
+    }
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <LinearGradient
+          colors={[COLORS.backgroundDarker, COLORS.background]}
+          style={styles.gradient}
+        >
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={styles.loadingText}>लोड हो रहा है...</Text>
+          </View>
+        </LinearGradient>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <LinearGradient
+          colors={[COLORS.backgroundDarker, COLORS.background]}
+          style={styles.gradient}
+        >
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={loadHomeData}>
+              <Text style={styles.retryButtonText}>पुनः प्रयास करें</Text>
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -42,12 +93,12 @@ export const HomeScreen = () => {
         <View style={styles.mainContainer}>
           <Header />
           <ScrollView style={styles.content}>
-            <WeatherSection />
-            <ActionCards />
+            <WeatherSection data={homeData?.weather?.current} />
+            <ActionCards navigation={navigation} />
             
             <SectionHeader 
               title="सर्वाधिक मंडी किमतें"
-              onSeeAll={() => {}}
+              onSeeAll={() => handleSeeAll(homeData?.marketPrices?.seeAllScreen)}
             />
 
             <ScrollView 
@@ -55,7 +106,7 @@ export const HomeScreen = () => {
               showsHorizontalScrollIndicator={false}
               style={styles.horizontalScroll}
             >
-              {marketPrices.map(item => (
+              {homeData?.marketPrices?.topMarkets.map(item => (
                 <MarketPriceCard
                   key={item.id}
                   name={item.name}
@@ -67,9 +118,9 @@ export const HomeScreen = () => {
 
             <SectionHeader 
               title="आज के बाज़ार के भाव"
-              onSeeAll={() => {}}
+              onSeeAll={() => handleSeeAll(homeData?.marketPrices?.seeAllScreen)}
             />
-            {marketRates.map(item => (
+            {homeData?.marketPrices?.todayRates.map(item => (
               <MarketRateItem
                 key={item.id}
                 cropName={item.cropName}
@@ -77,20 +128,23 @@ export const HomeScreen = () => {
               />
             ))}
 
-            <WeatherForecast />
-            <AgricultureTips />
+            <WeatherForecast data={homeData?.weather} />
+            <AgricultureTips 
+              data={homeData?.agricultureTips?.tips}
+              onSeeAll={() => handleSeeAll(homeData?.agricultureTips?.seeAllScreen)}
+            />
 
             <SectionHeader 
               title="सरकारी योजना अपडेट"
-              onSeeAll={() => {}}
+              onSeeAll={() => handleSeeAll(homeData?.schemes?.seeAllScreen)}
             />
-            <GovernmentSchemes />
+            <GovernmentSchemes data={homeData?.schemes?.items} />
             
             <SectionHeader 
               title="हमारे किसानों का अनुभव"
-              onSeeAll={() => {}}
+              onSeeAll={() => handleSeeAll(homeData?.testimonials?.seeAllScreen)}
             />
-            <FarmerTestimonials />
+            <FarmerTestimonials data={homeData?.testimonials?.items} />
           </ScrollView>
           <Footer activeTab={activeTab} onTabPress={handleTabPress} />
         </View>
@@ -115,5 +169,38 @@ const styles = StyleSheet.create({
   },
   horizontalScroll: {
     flexGrow: 0,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: SPACING.md,
+    color: COLORS.text.primary,
+    fontSize: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  errorText: {
+    color: COLORS.text.primary,
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: SPACING.md,
+  },
+  retryButton: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '600',
   },
 }); 

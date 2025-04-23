@@ -13,28 +13,34 @@ const { width } = Dimensions.get('window');
 const SPACING = 16;
 const CARD_WIDTH = width - (SPACING * 2);
 
-// Sample data - In real app, this will come from backend
-const schemes = [
+// Fallback data if no props are provided
+const defaultSchemes = [
   {
     id: 1,
-    image_link: require('../../../assets/images/fasal_beema.png'),
+    title: 'प्रधानमंत्री फसल बीमा योजना',
+    image_link: 'https://agricoop.gov.in/sites/default/files/PMFBY%20Logo%20English.jpg',
     redirect_link: 'https://pmfby.gov.in'
   },
   {
     id: 2,
-    image_link: require('../../../assets/images/kisan_mandhan.png'),
+    title: 'किसान मानधन योजना',
+    image_link: 'https://static.pib.gov.in/WriteReadData/userfiles/image/image001UNEV.jpg',
     redirect_link: 'https://pmkmy.gov.in'
   },
   {
     id: 3,
-    image_link: require('../../../assets/images/namo_drone.png'),
+    title: 'नमो ड्रोन योजना',
+    image_link: 'https://static.pib.gov.in/WriteReadData/userfiles/image/Nano_Drone.jpeg',
     redirect_link: 'https://namodrone.gov.in'
   }
 ];
 
-export const GovernmentSchemes = () => {
+export const GovernmentSchemes = ({ data }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollX = new Animated.Value(0);
+  
+  // Use provided data or fallback to default
+  const schemes = data || defaultSchemes;
 
   const handleSchemePress = (link) => {
     Linking.openURL(link).catch((err) => console.error('Could not open URL:', err));
@@ -83,7 +89,7 @@ export const GovernmentSchemes = () => {
             activeOpacity={0.95}
           >
             <Image
-              source={scheme.image_link}
+              source={typeof scheme.image_link === 'string' ? { uri: scheme.image_link } : scheme.image_link}
               style={styles.schemeImage}
               resizeMode="cover"
             />
