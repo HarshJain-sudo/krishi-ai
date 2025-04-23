@@ -15,14 +15,14 @@ const WeatherDay = ({ day, temp, icon, isWarning, humidity, wind }) => (
     )}
     <Text style={styles.tempText}>{temp}°C</Text>
     <View style={styles.weatherDetails}>
-      {/* <View style={styles.weatherDetail}>
+      <View style={styles.weatherDetail}>
         <Ionicons name="water-outline" size={14} color="#666" />
         <Text style={styles.detailText}>{humidity}%</Text>
-      </View> */}
-      {/* <View style={styles.weatherDetail}>
+      </View>
+      <View style={styles.weatherDetail}>
         <Ionicons name="leaf-outline" size={14} color="#666" />
         <Text style={styles.detailText}>{wind} km/h</Text>
-      </View> */}
+      </View>
     </View>
   </TouchableOpacity>
 );
@@ -40,7 +40,22 @@ const FarmingTip = ({ condition }) => (
   </View>
 );
 
-export const WeatherForecast = () => {
+export const WeatherForecast = ({ data, onSeeAll }) => {
+  // Use default data if no data is provided
+  const forecastData = data?.forecast || [
+    { day: 'आज', temp: 32, icon: 'sunny', humidity: 45, wind: 12 },
+    { day: 'शनि', temp: 31, icon: 'partly-cloudy', humidity: 52, wind: 8 },
+    { day: 'रवि', temp: 28, icon: 'rainy', humidity: 78, wind: 15, isWarning: true }
+  ];
+  
+  const warningData = data?.warning || {
+    title: 'फसल चेतावनी',
+    message: 'रविवार को तेज बारिश की चेतावनी - फसल सुरक्षा के लिए तैयारी करें'
+  };
+
+  // Get the condition of today for farming tip
+  const todayCondition = forecastData[0]?.icon || 'sunny';
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -48,48 +63,39 @@ export const WeatherForecast = () => {
           <Text style={styles.title}>मौसम पूर्वानुमान</Text>
           <Text style={styles.subtitle}>कृषि कार्य के लिए मौसम जानकारी</Text>
         </View>
-        <TouchableOpacity style={styles.seeAllButton}>
+        <TouchableOpacity style={styles.seeAllButton} onPress={onSeeAll}>
           <Text style={styles.seeAll}>सभी देखें</Text>
           <Ionicons name="chevron-forward" size={16} color={COLORS.primary} />
         </TouchableOpacity>
       </View>
       
       <View style={styles.forecastContainer}>
-        <WeatherDay 
-          day="आज" 
-          temp="32" 
-          icon="sunny" 
-          humidity="45"
-          wind="12"
-        />
-        <WeatherDay 
-          day="शनि" 
-          temp="31" 
-          icon="partly-cloudy"
-          humidity="52"
-          wind="8"
-        />
-        <WeatherDay 
-          day="रवि" 
-          temp="28" 
-          icon="rainy" 
-          isWarning
-          humidity="78"
-          wind="15"
-        />
+        {forecastData.map((day, index) => (
+          <WeatherDay 
+            key={index}
+            day={day.day}
+            temp={day.temp}
+            icon={day.icon}
+            isWarning={day.isWarning}
+            humidity={day.humidity}
+            wind={day.wind}
+          />
+        ))}
       </View>
 
-      <FarmingTip condition="sunny" />
+      <FarmingTip condition={todayCondition} />
 
-      <View style={styles.warningBox}>
-        <View style={styles.warningIcon}>
-          <Ionicons name="warning-outline" size={20} color="#fff" />
+      {warningData && (
+        <View style={styles.warningBox}>
+          <View style={styles.warningIcon}>
+            <Ionicons name="warning-outline" size={20} color="#fff" />
+          </View>
+          <View style={styles.warningContent}>
+            <Text style={styles.warningTitle}>{warningData.title}</Text>
+            <Text style={styles.warningText}>{warningData.message}</Text>
+          </View>
         </View>
-        <View style={styles.warningContent}>
-          <Text style={styles.warningTitle}>फसल चेतावनी</Text>
-          <Text style={styles.warningText}>रविवार को तेज बारिश की चेतावनी - फसल सुरक्षा के लिए तैयारी करें</Text>
-        </View>
-      </View>
+      )}
     </View>
   );
 };

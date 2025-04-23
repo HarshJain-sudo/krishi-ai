@@ -12,12 +12,22 @@ export const ActionCard = ({
   buttonText, 
   icon,
   onPress,
-  buttonWidth = '100%'
+  buttonWidth = '100%',
+  screenToNavigate,
+  navigation
 }) => {
+  const handlePress = () => {
+    if (screenToNavigate && navigation) {
+      navigation.navigate(screenToNavigate);
+    } else if (onPress) {
+      onPress();
+    }
+  };
+
   return (
     <TouchableOpacity 
       style={styles.container}
-      onPress={onPress}
+      onPress={handlePress}
       activeOpacity={0.95}
     >
       <View style={styles.contentContainer}>
@@ -31,7 +41,7 @@ export const ActionCard = ({
           </View>
           <TouchableOpacity 
             style={[styles.button, { width: buttonWidth }]}
-            onPress={onPress}
+            onPress={handlePress}
           >
             <Text style={styles.buttonText}>{buttonText}</Text>
           </TouchableOpacity>

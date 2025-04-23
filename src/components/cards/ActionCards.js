@@ -8,7 +8,7 @@ const { width } = Dimensions.get('window');
 const CARD_SPACING = SPACING.lg;
 const CARD_WIDTH = width * 0.9; // 90% of screen width
 
-export const ActionCards = () => {
+export const ActionCards = ({ navigation }) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const handleScroll = (event) => {
@@ -23,14 +23,16 @@ export const ActionCards = () => {
       description: "AI से पाएं हर मंडी का लाइव रेट, बेचें सही दाम पर, बढ़ाएं मुनाफा",
       buttonText: "मंडी भाव पूछें →",
       icon: <MaterialIcons name="mic" size={40} color="white" />,
-      buttonWidth: "100%"
+      buttonWidth: "100%",
+      screenToNavigate: "VoiceAssistant"
     },
     {
       title: "मिट्टी की शक्ति जानें",
       description: "70% किसानों ने बढ़ाई उपज, जानें अपनी मिट्टी की सही क्षमता",
       buttonText: "मुफ्त जांच करें →",
       icon: <MaterialCommunityIcons name="sprout" size={40} color="white" />,
-      buttonWidth: "100%"
+      buttonWidth: "100%",
+      screenToNavigate: "SoilTest"
     }
   ];
 
@@ -51,7 +53,7 @@ export const ActionCards = () => {
           <View key={index} style={styles.cardWrapper}>
             <ActionCard
               {...card}
-              onPress={() => {}}
+              navigation={navigation}
             />
           </View>
         ))}

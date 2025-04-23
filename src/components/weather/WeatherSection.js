@@ -1,21 +1,43 @@
 import React from 'react';
-import { StyleSheet, View, Text, Image } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import { COLORS, SPACING, FONTS } from '../../constants/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-export const WeatherSection = () => {
+export const WeatherSection = ({ data }) => {
+  // Default values if no data is provided
+  const temperature = data?.temp || 32;
+  const condition = data?.condition || 'partly-cloudy';
+  const date = data?.date || '18 अप्रैल, 2025';
+  const day = data?.day || 'शुक्रवार';
+  
+  // Select the appropriate weather icon based on condition
+  const getWeatherIcon = () => {
+    switch(condition) {
+      case 'sunny':
+        return <MaterialCommunityIcons name="weather-sunny" size={32} color="#FFB300" />;
+      case 'partly-cloudy':
+        return <MaterialCommunityIcons name="weather-partly-cloudy" size={32} color="#FFB300" />;
+      case 'cloudy':
+        return <MaterialCommunityIcons name="weather-cloudy" size={32} color="#666" />;
+      case 'rainy':
+        return <MaterialCommunityIcons name="weather-rainy" size={32} color="#4476FF" />;
+      default:
+        return <MaterialCommunityIcons name="weather-partly-cloudy" size={32} color="#FFB300" />;
+    }
+  };
+  
   return (
     <View style={styles.container}>
       <View style={styles.mainContent}>
         <View>
           <Text style={styles.greeting}>सुप्रभात, राजेश!</Text>
-          <Text style={styles.date}>18 अप्रैल, 2025 | शुक्रवार</Text>
+          <Text style={styles.date}>{date} | {day}</Text>
         </View>
         <View style={styles.weatherContainer}>
           <View style={styles.weatherIconContainer}>
-            <MaterialCommunityIcons name="weather-partly-cloudy" size={32} color="#FFB300" />
+            {getWeatherIcon()}
           </View>
-          <Text style={styles.temperature}>32°C</Text>
+          <Text style={styles.temperature}>{temperature}°C</Text>
         </View>
       </View>
     </View>
